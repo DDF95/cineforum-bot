@@ -150,7 +150,7 @@ async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
             with open(backup_file_path, "rb") as file:
                 await context.bot.send_document(chat_id=update.message.from_user.id, document=file)
         except Exception as e:
-            await update.message.reply_text("An error occurred while sending the backup.")
+            await update.message.reply_text("Errore:\n\n{e}")
 
 
 async def restart_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
