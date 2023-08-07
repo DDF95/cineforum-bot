@@ -5,9 +5,9 @@
 1. Start a chat with the bot or invite it to your cineforum group.
 2. Use the following commands:
    - `/aggiungi <film>`: Add one or more movies to your list.
-   - `/delete`: Delete all movies you have added.
-   - `/random`: Choose a random movie from the entire list (Admin only).
-   - `/list`: Generate a list of all movies.
+   - `/cancella`: Delete all movies you have added.
+   - `/scegli`: Choose a random movie from the entire list (Admin only).
+   - `/lista`: Generate a list of all movies.
    - `/help`: Get information about available commands.
 
 ## Installation
