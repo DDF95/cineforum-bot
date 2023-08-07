@@ -132,9 +132,25 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/aggiungi: Aggiunge uno o più film alla lista.\n"
         "/cancella: Elimina tutti i film che hai aggiunto.\n"
         "/lista: Mostra la lista di tutti i film da vedere.\n"
-        "/scegli: Sceglie casualmente un film dalla lista. (Admin only)"
+        "/scegli: Sceglie casualmente un film dalla lista. (Admin only)\n"
+        "/letterboxd: Link alla lista di film che abbiamo visto in passato.\n"
     )
     await update.message.reply_html(help_text)
+
+
+async def letterboxd_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Questi sono i film che abbiamo visto in passato: https://letterboxd.com/alannadi/list/every-night-is-movie-night-cineforum/")
+
+
+async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if is_admin(update.message.from_user.id):
+        backup_file_path = main_directory / "movie_data.json"
+
+        try:
+            with open(backup_file_path, "rb") as file:
+                await context.bot.send_document(chat_id=update.message.from_user.id, document=file)
+        except Exception as e:
+            await update.message.reply_text("An error occurred while sending the backup.")
 
 
 async def restart_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -161,6 +177,12 @@ if __name__ == '__main__':
 
     help_command_handler = CommandHandler(('help', 'start'), help_command)
     application.add_handler(help_command_handler, 4)
+
+    letterboxd_list_handler = CommandHandler('letterboxd', letterboxd_list)
+    application.add_handler(letterboxd_list_handler, 5)
+
+    send_backup_handler = CommandHandler('backup', send_backup)
+    application.add_handler(send_backup_handler, 98)
 
     restart_handler = CommandHandler('restart', restart_bot)
     application.add_handler(restart_handler, 99)
