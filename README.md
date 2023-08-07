@@ -1,5 +1,5 @@
 # cineforum-bot
-‘cineforum-bot‘ is a Telegram bot designed to help manage a cineforum group. It allows users to create a list of movies they want to watch together, choose random movies, and more.
+`cineforum-bot` is a Telegram bot designed to help manage a cineforum group. It allows users to create a list of movies they want to watch together, choose random movies, and more.
 
 ## Usage
 1. Start a chat with the bot or invite it to your cineforum group.
