@@ -25,26 +25,26 @@ async def random_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if is_admin(update.message.from_user.id):
         movie_data = load_movie_data()
 
-        all_movies = []
-        movie_users = {}
-        for user_id, user_data in movie_data.items():
-            for movie in user_data["movies"]:
-                all_movies.append(movie)
-                movie_users[movie] = user_data["first_name"]
-
-        if not all_movies:
-            await update.message.reply_text("Nessun film nella lista.")
+        if not movie_data:
+            await update.message.reply_text("La lista è vuota. Usa il comando /aggiungi per aggiungere dei film.")
             return
 
-        random_movie = random.choice(all_movies)
-        user_who_added = movie_users.get(random_movie, "Sconosciuto")
-        
-        for user_id, user_data in movie_data.items():
-            if random_movie in user_data["movies"]:
-                user_data["movies"].remove(random_movie)
+        random_user_id = random.choice(list(movie_data.keys()))
+        user_data = movie_data[random_user_id]
+        user_name = user_data["first_name"]
+        user_movies = user_data["movies"]
+
+        if not user_movies:
+            await update.message.reply_text(f"Nessun film aggiunto da {user_name}.")
+            return
+
+        random_movie = random.choice(user_movies)
+        user_movies.remove(random_movie)
+        if len(user_movies) == 0:
+            del movie_data[random_user_id]
         
         save_movie_data(movie_data)
-        await update.message.reply_html(f"Film scelto casualmente: <i>{random_movie}</i>\n\n(aggiunto da <b>{user_who_added}</b>)")
+        await update.message.reply_html(f"Film scelto casualmente: <i>{random_movie}</i>\n\n(aggiunto da <b>{user_name}</b>)")
 
 
 def load_movie_data():
@@ -150,7 +150,7 @@ async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
             with open(backup_file_path, "rb") as file:
                 await context.bot.send_document(chat_id=update.message.from_user.id, document=file)
         except Exception as e:
-            await update.message.reply_text("Errore:\n\n{e}")
+            await update.message.reply_text("An error occurred while sending the backup.")
 
 
 async def restart_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
