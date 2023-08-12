@@ -8,6 +8,7 @@
    - `/cancella`: Delete all movies you have added.
    - `/scegli`: Choose a random movie from the entire list (Admin only).
    - `/lista`: Generate a list of all movies.
+   - `/restart`: Restarts the bot.
    - `/help`: Get information about available commands.
 
 ## Installation
