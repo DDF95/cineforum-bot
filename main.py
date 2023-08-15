@@ -148,35 +148,71 @@ async def delete_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Questo comando è disponibile solo nei gruppi.")
         return
     
+    help_text = (
+        "Per eliminare un film dalla lista, usa il comando /cancella seguito dal numero del film. Esempio: <code>/cancella 5</code>\n\n"
+        "Per eliminare tutti i film che hai aggiunto, usa il comando <code>/cancella tutti</code>"
+    )
+
     movie_data = load_movie_data()
 
     group_id = str(update.message.chat.id)
     user_id = str(update.message.from_user.id)
+    is_group_admin = update.message.from_user.id in [admin.user.id for admin in await context.bot.get_chat_administrators(update.message.chat.id)]
 
-    if group_id in movie_data and user_id in movie_data[group_id]:
-        deleted_movies = movie_data[group_id][user_id]["movies"]
-        del movie_data[group_id][user_id]
-
-        if not movie_data[group_id]:
-            del movie_data[group_id]
-
-        save_movie_data(movie_data)
-
-        message = "Film eliminati:\n"
-        for idx, movie in enumerate(deleted_movies, start=1):
-            message += f"{idx}. {movie}\n"
-        await update.message.reply_text(message)
+    if not context.args:
+        await update.message.reply_html(help_text)
     else:
-        await update.message.reply_text("Non hai film da eliminare.")
+        if context.args[0].isdigit():
+            movie_number = int(context.args[0])
+
+            movie_list = []
+            for user_id, user_data in movie_data.get(group_id, {}).items():
+                first_name = user_data["first_name"]
+                movies = user_data["movies"]
+                movie_list.append((user_id, first_name, movies))
+
+            movie_list.sort(key=lambda x: x[0])
+            movie_counter = 1
+            for user_id, first_name, movies in movie_list:
+                for movie in movies:
+                    if movie_counter == movie_number:
+                        if is_group_admin or user_id == str(update.message.from_user.id):
+                            movies.remove(movie)
+                            save_movie_data(movie_data)
+                            await update.message.reply_html(f"Il film <code>{movie}</code> è stato eliminato.")
+                        else:
+                            await update.message.reply_text("Puoi eliminare solo i tuoi film.")
+                        return
+                    movie_counter += 1
+        else:
+            if context.args[0] == "tutti":
+                if group_id in movie_data and user_id in movie_data[group_id]:
+                    deleted_movies = movie_data[group_id][user_id]["movies"]
+
+                    del movie_data[group_id][user_id]
+
+                    if not movie_data[group_id]:
+                        del movie_data[group_id]
+
+                    save_movie_data(movie_data)
+
+                    message = "Film eliminati:\n\n<code>"
+                    for movie in deleted_movies:
+                        message += f"{movie}\n"
+                    await update.message.reply_html(message + "</code>")
+                else:
+                    await update.message.reply_text("Non hai film da eliminare.")
+            else:
+                await update.message.reply_html(help_text)
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
         "<b>Comandi disponibili:</b>\n"
         "/aggiungi: Aggiunge uno o più film alla lista.\n"
-        "/cancella: Elimina tutti i film che hai aggiunto.\n"
+        "/cancella: Cancella il film con il numero specificato, oppure tutti i film che hai aggiunto.\n"
         "/lista: Mostra la lista di tutti i film da vedere.\n"
-        "/scegli: Sceglie casualmente un film dalla lista. (Admin only)\n"
+        "/scegli: Sceglie casualmente un film dalla lista. (solo per admin del gruppo)\n"
         "/letterboxd: Link alla lista di film che abbiamo visto in passato.\n"
     )
     await update.message.reply_html(help_text)
