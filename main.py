@@ -39,7 +39,7 @@ async def random_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     if not update.message.from_user.id in [admin.user.id for admin in await context.bot.get_chat_administrators(update.message.chat.id)]:
-        await update.message.reply_text("Solo gli amministratori del gruppo possono usare questo comando.")
+        await update.message.reply_text("Solo lx admin del gruppo possono usare questo comando.")
         return
     
     movie_data = load_movie_data()
@@ -111,7 +111,6 @@ async def add_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     save_movie_data(movie_data)
     await update.message.reply_text("Fatto!")
-
 
 
 async def generate_movie_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -216,6 +215,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/lista: Mostra la lista di tutti i film da vedere.\n"
         "/scegli: Sceglie casualmente un film dalla lista. (solo per admin del gruppo)\n"
         "/letterboxd: Link alla lista di film che abbiamo visto in passato.\n"
+        "/setletterboxd: Imposta il link a Letterboxd per il gruppo. (solo per admin del gruppo)\n"
     )
     await update.message.reply_html(help_text)
 
@@ -237,12 +237,16 @@ async def set_letterboxd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Questo comando è disponibile solo nei gruppi.")
         return
     
+    if not update.message.from_user.id in [admin.user.id for admin in await context.bot.get_chat_administrators(update.message.chat.id)]: 
+        await update.message.reply_text("Solo lx admin possono impostare il link a Letterboxd.")
+        return
+
     if not context.args:
         await update.message.reply_text("Per utilizzare questo comando, inserisci il link di Letterboxd.")
         return
     
     group_id = str(update.message.chat.id)
-    letterboxd_link = context.args[0]  # Assuming the link is provided as the first argument
+    letterboxd_link = context.args[0]
     
     movie_data = load_movie_data()
     if group_id not in movie_data:
@@ -252,7 +256,6 @@ async def set_letterboxd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_movie_data(movie_data)
     
     await update.message.reply_text("Il link di Letterboxd è stato impostato correttamente.")
-
 
 
 async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
