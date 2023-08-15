@@ -39,7 +39,7 @@ async def random_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     if not update.message.from_user.id in [admin.user.id for admin in await context.bot.get_chat_administrators(update.message.chat.id)]:
-        await update.message.reply_text("Sorry solo lx admin possono usare questo comando, serve ad evitare che il comando venga usato per sbaglio")
+        await update.message.reply_text("Solo gli amministratori del gruppo possono usare questo comando.")
         return
     
     movie_data = load_movie_data()
@@ -51,13 +51,17 @@ async def random_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     group_movies = movie_data[group_id]
 
-    all_users = list(group_movies.keys())
+    if not group_movies["users"]:
+        await update.message.reply_text("La lista del gruppo è vuota. Usa il comando /aggiungi per aggiungere dei film.")
+        return
+
+    all_users = list(group_movies["users"].keys())
     if not all_users:
         await update.message.reply_text("La lista del gruppo è vuota. Usa il comando /aggiungi per aggiungere dei film.")
         return
 
     random_user_id = random.choice(all_users)
-    user_data = group_movies[random_user_id]
+    user_data = group_movies["users"][random_user_id]
     user_name = user_data["first_name"]
     user_movies = user_data["movies"]
 
@@ -68,7 +72,7 @@ async def random_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
     random_movie = random.choice(user_movies)
     user_movies.remove(random_movie)
     if len(user_movies) == 0:
-        del group_movies[random_user_id]
+        del group_movies["users"][random_user_id]
 
     save_movie_data(movie_data)
     await update.message.reply_html(f"Film scelto casualmente: <i>{random_movie}</i>\n\n(aggiunto da <b>{user_name}</b>)")
@@ -82,7 +86,7 @@ async def add_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_html("Inserisci almeno un film. Se vuoi puoi inserirne più di uno andando a capo. Esempio:\n\n<code>/aggiungi Film 1\nFilm 2\nFilm 3</code>")
         return
-
+    
     group_id = str(update.message.chat.id)
     user_id = str(update.message.from_user.id)
     first_name = update.message.from_user.first_name
@@ -96,13 +100,18 @@ async def add_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     movie_data = load_movie_data()
     if group_id not in movie_data:
-        movie_data[group_id] = {}
-    if user_id not in movie_data[group_id]:
-        movie_data[group_id][user_id] = {"first_name": first_name, "movies": []}
-    movie_data[group_id][user_id]["movies"].extend(movies)
+        movie_data[group_id] = {
+            "letterboxd_link": "",
+            "users": {}
+        }
+    if user_id not in movie_data[group_id]["users"]:
+        movie_data[group_id]["users"][user_id] = {"first_name": first_name, "movies": []}
+    
+    movie_data[group_id]["users"][user_id]["movies"].extend(movies)
 
     save_movie_data(movie_data)
     await update.message.reply_text("Fatto!")
+
 
 
 async def generate_movie_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -119,14 +128,14 @@ async def generate_movie_list(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     group_movies = movie_data[group_id]
 
-    if not group_movies:
+    if not group_movies["users"]:
         await update.message.reply_text("La lista del gruppo è vuota. Usa il comando /aggiungi per aggiungere dei film.")
         return
 
     message = "<b>Lista dei film da vedere</b>\n"
 
     movie_counter = 1
-    for user_id, user_data in group_movies.items():
+    for user_id, user_data in group_movies["users"].items():
         first_name = user_data["first_name"]
         movies = user_data["movies"]
         
@@ -134,8 +143,6 @@ async def generate_movie_list(update: Update, context: ContextTypes.DEFAULT_TYPE
         for movie in movies:
             message += f"{movie_counter}. {movie}\n"
             movie_counter += 1
-
-    message += f"\n<i>Per aggiungere un film alla lista usa il comando /aggiungi</i>"
 
     await update.message.reply_html(message)
 
@@ -163,7 +170,7 @@ async def delete_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
             movie_number = int(context.args[0])
 
             movie_list = []
-            for user_id, user_data in movie_data.get(group_id, {}).items():
+            for user_id, user_data in movie_data.get(group_id, {}).get("users", {}).items():
                 movies = user_data["movies"]
                 movie_list.append((user_id, movies))
 
@@ -181,10 +188,10 @@ async def delete_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     movie_counter += 1
         else:
             if context.args[0] == "tutti":
-                if group_id in movie_data and user_id in movie_data[group_id]:
-                    deleted_movies = movie_data[group_id][user_id]["movies"]
+                if group_id in movie_data and user_id in movie_data[group_id]["users"]:
+                    deleted_movies = movie_data[group_id]["users"][user_id]["movies"]
 
-                    del movie_data[group_id][user_id]
+                    del movie_data[group_id]["users"][user_id]
 
                     if not movie_data[group_id]:
                         del movie_data[group_id]
@@ -201,7 +208,6 @@ async def delete_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_html(help_text)
 
 
-
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
         "<b>Comandi disponibili:</b>\n"
@@ -215,7 +221,38 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def letterboxd_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Questi sono i film che abbiamo visto in passato: https://letterboxd.com/alannadi/list/every-night-is-movie-night-cineforum/")
+    movie_data = load_movie_data()
+    group_id = str(update.message.chat.id)
+    
+    letterboxd_link = movie_data.get(group_id, {}).get("letterboxd_link", "")
+
+    if letterboxd_link:
+        await update.message.reply_text(f"{letterboxd_link}")
+    else:
+        await update.message.reply_text("Il link a Letterboxd non è stato impostato per questo gruppo.")
+
+
+async def set_letterboxd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.chat.type == constants.ChatType.PRIVATE:
+        await update.message.reply_text("Questo comando è disponibile solo nei gruppi.")
+        return
+    
+    if not context.args:
+        await update.message.reply_text("Per utilizzare questo comando, inserisci il link di Letterboxd.")
+        return
+    
+    group_id = str(update.message.chat.id)
+    letterboxd_link = context.args[0]  # Assuming the link is provided as the first argument
+    
+    movie_data = load_movie_data()
+    if group_id not in movie_data:
+        movie_data[group_id] = {}
+    
+    movie_data[group_id]["letterboxd_link"] = letterboxd_link
+    save_movie_data(movie_data)
+    
+    await update.message.reply_text("Il link di Letterboxd è stato impostato correttamente.")
+
 
 
 async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -256,6 +293,9 @@ if __name__ == '__main__':
 
     letterboxd_list_handler = CommandHandler('letterboxd', letterboxd_list)
     application.add_handler(letterboxd_list_handler, 5)
+
+    set_letterboxd_handler = CommandHandler('setletterboxd', set_letterboxd)
+    application.add_handler(set_letterboxd_handler, 6)
 
     send_backup_handler = CommandHandler('backup', send_backup)
     application.add_handler(send_backup_handler, 98)
