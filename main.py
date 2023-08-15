@@ -123,21 +123,18 @@ async def generate_movie_list(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("La lista del gruppo è vuota. Usa il comando /aggiungi per aggiungere dei film.")
         return
 
-    movie_list = []
-    for user_id, user_data in group_movies.items():
-        first_name = user_data["first_name"]
-        movies = user_data["movies"]
-        movie_list.append((first_name, movies))
-
-    movie_list.sort(key=lambda x: x[0])
     message = "<b>Lista dei film da vedere</b>\n"
 
     movie_counter = 1
-    for first_name, movies in movie_list:
+    for user_id, user_data in group_movies.items():
+        first_name = user_data["first_name"]
+        movies = user_data["movies"]
+        
         message += f"\nScelti da <b>{first_name}</b>:\n"
         for movie in movies:
             message += f"{movie_counter}. {movie}\n"
             movie_counter += 1
+
     message += f"\n<i>Per aggiungere un film alla lista usa il comando /aggiungi</i>"
 
     await update.message.reply_html(message)
@@ -167,13 +164,11 @@ async def delete_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             movie_list = []
             for user_id, user_data in movie_data.get(group_id, {}).items():
-                first_name = user_data["first_name"]
                 movies = user_data["movies"]
-                movie_list.append((user_id, first_name, movies))
+                movie_list.append((user_id, movies))
 
-            movie_list.sort(key=lambda x: x[0])
             movie_counter = 1
-            for user_id, first_name, movies in movie_list:
+            for user_id, movies in movie_list:
                 for movie in movies:
                     if movie_counter == movie_number:
                         if is_group_admin or user_id == str(update.message.from_user.id):
@@ -204,6 +199,7 @@ async def delete_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await update.message.reply_text("Non hai film da eliminare.")
             else:
                 await update.message.reply_html(help_text)
+
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
