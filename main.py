@@ -73,7 +73,7 @@ async def random_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
         del group_movies["users"][random_user_id]
 
     save_movie_data(movie_data)
-    await update.message.reply_html(get_localized_message(update, "RANDOM_MOVIE", random_movie=random_movie, user_name=user_name))
+    await update.message.reply_html(get_localized_message(update, "RANDOM_MOVIE_CHOSEN", random_movie=random_movie, user_name=user_name))
 
 
 async def add_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
