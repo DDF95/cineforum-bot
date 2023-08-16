@@ -27,7 +27,7 @@ Contributions to the project are welcome! If you have any suggestions, bug repor
 
 ## To-do
 - ~~Add /setletterboxd to set a group-specific Letterboxd link. It should be saved in the JSON;~~
-- Localized strings in Italian and English;
+- ~~Localized strings in Italian and English;~~
 - Settings (toggleable welcome message?);
 - ~~A way to delete specific movies from the list;~~
 - Some sort of integration with JustWatch.
