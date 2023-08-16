@@ -4,10 +4,10 @@
 ## Usage
 1. Start a chat with the bot or invite it to your cineforum group.
 2. The following commands are available:
-   - `/aggiungi <film>`: Add one or more movies to your list.
-   - `/cancella`: Delete the movie associated to a number in the list, or delete all your movies.
-   - `/scegli`: Choose a random movie from the entire list (Admin only).
-   - `/lista`: Generate a list of all movies.
+   - `/add <movie>`: Add one or more movies to your list.
+   - `/delete`: Delete the movie associated to a number in the list, or delete all your movies.
+   - `/choose`: Choose a random movie from the entire list (Admin only).
+   - `/list`: Generate a list of all movies.
    - `/letterboxd`: Show the group's Letterboxd link.
    - `/setletterboxd`: Set the group's Letterboxd link.
    - `/restart`: Restarts the bot.
