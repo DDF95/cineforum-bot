@@ -15,7 +15,7 @@
 
 ## Installation
 1. Clone this repository.
-2. Install the required dependencies: `pip install -U python-telegram-bot`.
+2. Install the required dependencies: `pip install -r requirements.txt`.
 3. Replace the placeholder token in `main.py` with your own Telegram Bot API token.
 4. Run the bot: `python3 main.py`.
 
