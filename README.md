@@ -26,8 +26,11 @@
 Contributions to the project are welcome! If you have any suggestions, bug reports, or improvements, please open an issue or submit a pull request.
 
 ## To-do
-- ~~Add /setletterboxd to set a group-specific Letterboxd link. It should be saved in the JSON;~~
-- ~~Localized strings in Italian and English;~~
-- Settings (toggleable welcome message?);
-- ~~A way to delete specific movies from the list;~~
-- Some sort of integration with JustWatch.
+1. Settings:
+   - welcome message (yes/no);
+   - welcome message text in html;
+   - unified movie list or one list per user;
+   - /choose command available only to admins (yes/no);
+   - /delete command available only to admins (yes/no);
+2. /info command: show information about the group (same as welcome message);
+3. Some sort of integration with JustWatch.
