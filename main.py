@@ -2,36 +2,33 @@ import json
 import os
 import random
 import sys
-from pathlib import Path
 
-from telegram import Update, constants
+from telegram import Update, constants, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
+import config
 from localization import *
 
 
-application = ApplicationBuilder().token("INSERT BOT TOKEN HERE").build()
-
-main_directory = Path(__file__).absolute().parent
-json_file_path = main_directory / "movie_data.json"
+application = ApplicationBuilder().token(config.BOT_TOKEN).build()
 
 
 def is_admin(user_id: int):
-    if user_id == 14770193:
+    if user_id in config.BOT_ADMINS:
         return True
     else:
         return False
 
 
 def load_movie_data():
-    if json_file_path.exists():
-        with open(json_file_path, "r") as file:
+    if config.JSON_FILE_PATH.exists():
+        with open(config.JSON_FILE_PATH, "r") as file:
             return json.load(file)
     return {}
 
 
 def save_movie_data(data):
-    with open(json_file_path, "w") as file:
+    with open(config.JSON_FILE_PATH, "w") as file:
         json.dump(data, file, indent=4)
 
 
@@ -252,12 +249,22 @@ async def set_letterboxd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(get_localized_message(update, "SET_LETTERBOXD_LINK_SUCCESS"))
 
 
+async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("Welcome message: no", callback_data="welcome_message")],
+        [InlineKeyboardButton("Movie list type: per user", callback_data="movie_list_type")],
+        [InlineKeyboardButton("/choose for admins only: yes", callback_data="choose_admin_only")],
+        [InlineKeyboardButton("/delete for admins only: yes", callback_data="delete_admin_only")],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text("Settings:", reply_markup=reply_markup)
+
+
 async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if is_admin(update.message.from_user.id):
-        backup_file_path = main_directory / "movie_data.json"
-
         try:
-            with open(backup_file_path, "rb") as file:
+            with open(config.JSON_FILE_PATH, "rb") as file:
                 await context.bot.send_document(chat_id=update.message.from_user.id, document=file)
         except Exception as e:
             await update.message.reply_text(get_localized_message(update, "BACKUP_ERROR"))
@@ -293,6 +300,9 @@ if __name__ == '__main__':
 
     set_letterboxd_handler = CommandHandler('setletterboxd', set_letterboxd)
     application.add_handler(set_letterboxd_handler, 6)
+
+    settings_handler = CommandHandler(('impostazioni', 'settings'), settings)
+    application.add_handler(settings_handler, 97)
 
     send_backup_handler = CommandHandler('backup', send_backup)
     application.add_handler(send_backup_handler, 98)
