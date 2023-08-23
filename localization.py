@@ -40,7 +40,7 @@ MESSAGES = {
             "• Messaggio di benvenuto: Mostra o meno il messaggio di benvenuto quando una persona entra nel gruppo.\n"
             "• Tipo di lista: Scegli se la lista dei film deve essere divisa per utente o meno.\n"
             "• /scegli solo per admin: Modifica i permessi per il comando /scegli.\n"
-            "• /cancella solo per admin: Modifica i permessi per il comando /cancella.\n"
+            "• /cancella solo per admin: Modifica i permessi per il comando /cancella.\n\n"
             "/setletterboxd: Imposta il link a Letterboxd per il gruppo. (solo per admin del gruppo)\n"
             "/setbenvenuto: Imposta il messaggio di benvenuto del gruppo. L'HTML è supportato, e puoi usare <code>:name:</code> per inserire il nome della persona che entra nel gruppo. (solo per admin del gruppo)\n"
             "/cancellabenvenuto: Cancella il messaggio di benvenuto del gruppo. (solo per admin del gruppo)\n"
@@ -73,8 +73,8 @@ MESSAGES = {
         "SETTINGS_HEADER": "<b>Impostazioni</b>\n\n",
         "SETTINGS_TOGGLE_WELCOME_MESSAGE": "Messaggio di benvenuto",
         "SETTINGS_MOVIE_LIST_PER_USER": "Lista film divisa per utente",
-        "SETTINGS_CHOOSE_ADMIN_ONLY": "/choose solo per admin",
-        "SETTINGS_DELETE_ADMIN_ONLY": "/delete solo per admin",
+        "SETTINGS_CHOOSE_ADMIN_ONLY": "/scegli solo per admin",
+        "SETTINGS_DELETE_ADMIN_ONLY": "/cancella solo per admin",
         "SETTINGS_SAVED": "Impostazioni salvate.",
 
         # messaggio di benvenuto
@@ -124,7 +124,7 @@ MESSAGES = {
             "• Welcome message: Show or hide the welcome message when someone joins the group.\n"
             "• Movie list per user: Choose whether the movie list should be divided per user or not.\n"
             "• /choose for admin only: Change the permissions for the /choose command.\n"
-            "• /delete for admin only: Change the permissions for the /delete command.\n"
+            "• /delete for admin only: Change the permissions for the /delete command.\n\n"
             "/setletterboxd: Set the Letterboxd link for the group. (only for group admins)\n"
             "/setwelcome: Set the group's welcome message. HTML is supported, and you can use <code>:name:<\code> to insert the name of the person who joins the group. (only for group admins)\n"
             "/deletewelcome: Delete the group's welcome message. (only for group admins)\n"

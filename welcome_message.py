@@ -77,10 +77,6 @@ async def show_welcome_message(update: Update, context: ContextTypes.DEFAULT_TYP
         await update.message.reply_text(get_localized_message(update, "COMMAND_NOT_AVAILABLE_IN_PRIVATE"))
         return
     
-    if not update.message.from_user.id in [admin.user.id for admin in await context.bot.get_chat_administrators(update.message.chat.id)]:
-        await update.message.reply_text(get_localized_message(update, "ADMIN_ONLY"))
-        return
-    
     settings = load_settings(update.message.chat.id)
     welcome_message = settings["welcome_message"]
     
