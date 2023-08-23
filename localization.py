@@ -34,7 +34,16 @@ MESSAGES = {
             "/lista: Mostra la lista di tutti i film da vedere.\n"
             "/scegli: Sceglie casualmente un film dalla lista. (solo per admin del gruppo)\n"
             "/letterboxd: Mostra il link alla lista Letterboxd del gruppo.\n"
+            "/benvenuto: Mostra il messaggio di benvenuto del gruppo.\n"
+            "\n<b>Impostazioni:</b>\n"
+            "/impostazioni: Mostra le impostazioni del bot.\n"
+            "• Messaggio di benvenuto: Mostra o meno il messaggio di benvenuto quando una persona entra nel gruppo.\n"
+            "• Tipo di lista: Scegli se la lista dei film deve essere divisa per utente o meno.\n"
+            "• /scegli solo per admin: Modifica i permessi per il comando /scegli.\n"
+            "• /cancella solo per admin: Modifica i permessi per il comando /cancella.\n"
             "/setletterboxd: Imposta il link a Letterboxd per il gruppo. (solo per admin del gruppo)\n"
+            "/setbenvenuto: Imposta il messaggio di benvenuto del gruppo. L'HTML è supportato, e puoi usare <code>:name:</code> per inserire il nome della persona che entra nel gruppo. (solo per admin del gruppo)\n"
+            "/cancellabenvenuto: Cancella il messaggio di benvenuto del gruppo. (solo per admin del gruppo)\n"
         ),
         "HELP_COMMAND_BOT_ADMIN": (
             "\n<b>Comandi del bot:</b>\n"
@@ -59,11 +68,25 @@ MESSAGES = {
         "CONFIG_TOKEN": "Inserisci il token del bot: ",
         "CONFIG_USER_ID": "Inserisci il tuo ID utente: ",
         "CONFIG_SUCCESS": "Configurazione completata! Il bot è ora attivo. Se riscontri problemi, elimina il file 'config.ini' e riavvia il bot.",
+
+        # /impostazioni
+        "SETTINGS_HEADER": "<b>Impostazioni</b>\n\n",
+        "SETTINGS_TOGGLE_WELCOME_MESSAGE": "Messaggio di benvenuto",
+        "SETTINGS_MOVIE_LIST_PER_USER": "Lista film divisa per utente",
+        "SETTINGS_CHOOSE_ADMIN_ONLY": "/choose solo per admin",
+        "SETTINGS_DELETE_ADMIN_ONLY": "/delete solo per admin",
+        "SETTINGS_SAVED": "Impostazioni salvate.",
+
+        # messaggio di benvenuto
+        "SET_WELCOME_MESSAGE_USAGE": "Inserisci il messaggio di benvenuto, verrà inviato ogni volta che una persona entra nel gruppo.",
+        "SETTINGS_WELCOME_MESSAGE_SET": "Il messaggio di benvenuto è stato impostato.",
+        "SETTINGS_WELCOME_MESSAGE_NOT_SET": "Il messaggio di benvenuto non è stato ancora impostato.",
+        "SETTINGS_WELCOME_MESSAGE_DELETED": "Il messaggio di benvenuto è stato eliminato.",
     },
     "en": {
         # misc
         "COMMAND_NOT_AVAILABLE_IN_PRIVATE": "This command is only available in groups.",
-        "ADMIN_ONLY": "Inly group admins can use this command.",
+        "ADMIN_ONLY": "Only group admins can use this command.",
         "MOVIE_LIST_EMPTY": "The group's movie list is empty. Use the /add command to add movies.",
 
         # /choose
@@ -95,7 +118,16 @@ MESSAGES = {
             "/list: Show the list of all movies to watch.\n"
             "/choose: Choose a random movie from the list. (only for group admins)\n"
             "/letterboxd: Show the link to the group's Letterboxd list.\n"
+            "/welcome: Show the group's welcome message.\n"
+            "\n<b>Settings:</b>\n"
+            "/settings: Show the bot's settings.\n"
+            "• Welcome message: Show or hide the welcome message when someone joins the group.\n"
+            "• Movie list per user: Choose whether the movie list should be divided per user or not.\n"
+            "• /choose for admin only: Change the permissions for the /choose command.\n"
+            "• /delete for admin only: Change the permissions for the /delete command.\n"
             "/setletterboxd: Set the Letterboxd link for the group. (only for group admins)\n"
+            "/setwelcome: Set the group's welcome message. HTML is supported, and you can use <code>:name:<\code> to insert the name of the person who joins the group. (only for group admins)\n"
+            "/deletewelcome: Delete the group's welcome message. (only for group admins)\n"
         ),
         "HELP_COMMAND_BOT_ADMIN": (
             "\n<b>Bot commands:</b>\n"
@@ -120,6 +152,20 @@ MESSAGES = {
         "CONFIG_TOKEN": "Enter your bot token: ",
         "CONFIG_USER_ID": "Enter your user ID: ",
         "CONFIG_SUCCESS": "Configuration completed! The bot is now running. If you encounter any issues, delete the 'config.ini' file and restart the bot.",
+
+        # /settings
+        "SETTINGS_HEADER": "<b>Settings</b>\n\n",
+        "SETTINGS_TOGGLE_WELCOME_MESSAGE": "Welcome message",
+        "SETTINGS_MOVIE_LIST_PER_USER": "Movie list divided per user",
+        "SETTINGS_CHOOSE_ADMIN_ONLY": "/choose for admins only",
+        "SETTINGS_DELETE_ADMIN_ONLY": "/delete for admins only",
+        "SETTINGS_SAVED": "Settings saved.",
+
+        # welcome message
+        "SET_WELCOME_MESSAGE_USAGE": "Enter the welcome message, it will be sent every time someone joins the group.",
+        "SETTINGS_WELCOME_MESSAGE_SET": "The welcome message has been set.",
+        "SETTINGS_WELCOME_MESSAGE_NOT_SET": "The welcome message has not been set yet.",
+        "SETTINGS_WELCOME_MESSAGE_DELETED": "The welcome message has been deleted.",
     }
 }
 

@@ -1,205 +1,23 @@
-import json
 import os
-import random
 import sys
 
-from telegram import Update, constants, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram import Update, constants
+from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
+                          ChatMemberHandler, CommandHandler, ContextTypes)
 
 import config
+from add_movies import add_movies
+from delete_movies import delete_movies
+from generate_movie_list import generate_movie_list
 from localization import *
+from random_movie import random_movie
+from settings import settings_button, show_settings
+from utils import is_admin, load_movie_data, save_movie_data
+from welcome_message import (delete_welcome_message, send_welcome_message,
+                             set_welcome_message, show_welcome_message)
 
 
 application = ApplicationBuilder().token(config.BOT_TOKEN).build()
-
-
-def is_admin(user_id: int):
-    if user_id in config.BOT_ADMINS:
-        return True
-    else:
-        return False
-
-
-def load_movie_data():
-    if config.JSON_FILE_PATH.exists():
-        with open(config.JSON_FILE_PATH, "r") as file:
-            return json.load(file)
-    return {}
-
-
-def save_movie_data(data):
-    with open(config.JSON_FILE_PATH, "w") as file:
-        json.dump(data, file, indent=4)
-
-
-async def random_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.chat.type == constants.ChatType.PRIVATE:
-        await update.message.reply_text(get_localized_message(update, "COMMAND_NOT_AVAILABLE_IN_PRIVATE"))
-        return
-    
-    if not update.message.from_user.id in [admin.user.id for admin in await context.bot.get_chat_administrators(update.message.chat.id)]:
-        await update.message.reply_text(get_localized_message(update, "ADMIN_ONLY"))
-        return
-    
-    movie_data = load_movie_data()
-
-    group_id = str(update.message.chat.id)
-    if group_id not in movie_data:
-        await update.message.reply_text(get_localized_message(update, "MOVIE_LIST_EMPTY"))
-        return
-
-    group_movies = movie_data[group_id]
-
-    if not group_movies["users"]:
-        await update.message.reply_text(get_localized_message(update, "MOVIE_LIST_EMPTY"))
-        return
-
-    all_users = list(group_movies["users"].keys())
-    if not all_users:
-        await update.message.reply_text(get_localized_message(update, "MOVIE_LIST_EMPTY"))
-        return
-
-    random_user_id = random.choice(all_users)
-    user_data = group_movies["users"][random_user_id]
-    user_name = user_data["first_name"]
-    user_movies = user_data["movies"]
-
-    random_movie = random.choice(user_movies)
-    user_movies.remove(random_movie)
-    if len(user_movies) == 0:
-        del group_movies["users"][random_user_id]
-
-    save_movie_data(movie_data)
-    await update.message.reply_html(get_localized_message(update, "RANDOM_MOVIE_CHOSEN", random_movie=random_movie, user_name=user_name))
-
-
-async def add_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.chat.type == constants.ChatType.PRIVATE:
-        await update.message.reply_text(get_localized_message(update, "COMMAND_NOT_AVAILABLE_IN_PRIVATE"))
-        return
-    
-    if not context.args:
-        await update.message.reply_html(get_localized_message(update, "ADD_MOVIES_USAGE"))
-        return
-    
-    group_id = str(update.message.chat.id)
-    user_id = str(update.message.from_user.id)
-    first_name = update.message.from_user.first_name
-
-    movies = update.message.text
-    movies = movies.replace("/aggiungi \n", "")
-    movies = movies.replace("/aggiungi" , "")
-    movies = movies.replace("/aggiungi\n", "")
-    movies = movies.replace("/add \n", "")
-    movies = movies.replace("/add" , "")
-    movies = movies.replace("/add\n", "")
-    movies = movies.split("\n")
-    movies = [movie.lstrip("- ") for movie in movies if movie.strip()]
-
-    movie_data = load_movie_data()
-    if group_id not in movie_data:
-        movie_data[group_id] = {
-            "letterboxd_link": "",
-            "users": {}
-        }
-    if user_id not in movie_data[group_id]["users"]:
-        movie_data[group_id]["users"][user_id] = {"first_name": first_name, "movies": []}
-    
-    movie_data[group_id]["users"][user_id]["movies"].extend(movies)
-
-    save_movie_data(movie_data)
-    await update.message.reply_text(get_localized_message(update, "ADD_MOVIES_SUCCESS"))
-
-
-async def generate_movie_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.chat.type == constants.ChatType.PRIVATE:
-        await update.message.reply_text(get_localized_message(update, "COMMAND_NOT_AVAILABLE_IN_PRIVATE"))
-        return
-    
-    movie_data = load_movie_data()
-
-    group_id = str(update.message.chat.id)
-    if group_id not in movie_data:
-        await update.message.reply_text(get_localized_message(update, "MOVIE_LIST_EMPTY"))
-        return
-
-    group_movies = movie_data[group_id]
-
-    if not group_movies["users"]:
-        await update.message.reply_text(get_localized_message(update, "MOVIE_LIST_EMPTY"))
-        return
-
-    message = get_localized_message(update, "MOVIE_LIST_HEADER")
-
-    movie_counter = 1
-    for user_id, user_data in group_movies["users"].items():
-        first_name = user_data["first_name"]
-        movies = user_data["movies"]
-        
-        message += get_localized_message(update, "MOVIE_LIST_USERS", first_name=first_name)
-        for movie in movies:
-            message += f"{movie_counter}. {movie}\n"
-            movie_counter += 1
-
-    await update.message.reply_html(message)
-
-
-async def delete_movies(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.chat.type == constants.ChatType.PRIVATE:
-        await update.message.reply_text(get_localized_message(update, "COMMAND_NOT_AVAILABLE_IN_PRIVATE"))
-        return
-    
-    help_text = get_localized_message(update, "DELETE_MOVIES_USAGE")
-
-    movie_data = load_movie_data()
-
-    group_id = str(update.message.chat.id)
-    user_id = str(update.message.from_user.id)
-    is_group_admin = update.message.from_user.id in [admin.user.id for admin in await context.bot.get_chat_administrators(update.message.chat.id)]
-
-    if not context.args:
-        await update.message.reply_html(help_text)
-    else:
-        if context.args[0].isdigit():
-            movie_number = int(context.args[0])
-
-            movie_list = []
-            for user_id, user_data in movie_data.get(group_id, {}).get("users", {}).items():
-                movies = user_data["movies"]
-                movie_list.append((user_id, movies))
-
-            movie_counter = 1
-            for user_id, movies in movie_list:
-                for movie in movies:
-                    if movie_counter == movie_number:
-                        if is_group_admin or user_id == str(update.message.from_user.id):
-                            movies.remove(movie)
-                            save_movie_data(movie_data)
-                            await update.message.reply_html(get_localized_message(update, "DELETE_MOVIES_SUCCESS", movie=movie))
-                        else:
-                            await update.message.reply_text(get_localized_message(update, "DELETE_MOVIES_OWN_ONLY"))
-                        return
-                    movie_counter += 1
-        else:
-            if context.args[0] == "tutti" or context.args[0] == "all":
-                if group_id in movie_data and user_id in movie_data[group_id]["users"]:
-                    deleted_movies = movie_data[group_id]["users"][user_id]["movies"]
-
-                    del movie_data[group_id]["users"][user_id]
-
-                    if not movie_data[group_id]:
-                        del movie_data[group_id]
-
-                    save_movie_data(movie_data)
-
-                    message = get_localized_message(update, "DELETE_MOVIES_HEADER")
-                    for movie in deleted_movies:
-                        message += f"{movie}\n"
-                    await update.message.reply_html(message + "</code>")
-                else:
-                    await update.message.reply_text(get_localized_message(update, "DELETE_MOVIES_EMPTY"))
-            else:
-                await update.message.reply_html(help_text)
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -247,24 +65,18 @@ async def set_letterboxd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_movie_data(movie_data)
     
     await update.message.reply_text(get_localized_message(update, "SET_LETTERBOXD_LINK_SUCCESS"))
+        
 
-
-async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [InlineKeyboardButton("Welcome message: no", callback_data="welcome_message")],
-        [InlineKeyboardButton("Movie list type: per user", callback_data="movie_list_type")],
-        [InlineKeyboardButton("/choose for admins only: yes", callback_data="choose_admin_only")],
-        [InlineKeyboardButton("/delete for admins only: yes", callback_data="delete_admin_only")],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await update.message.reply_text("Settings:", reply_markup=reply_markup)
+async def show_about(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("https://github.com/DDF95/cineforum-bot")
 
 
 async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if is_admin(update.message.from_user.id):
         try:
-            with open(config.JSON_FILE_PATH, "rb") as file:
+            with open(config.MOVIE_DATA_FILE_PATH, "rb") as file:
+                await context.bot.send_document(chat_id=update.message.from_user.id, document=file)
+            with open(config.SETTINGS_FILE_PATH, "rb") as file:
                 await context.bot.send_document(chat_id=update.message.from_user.id, document=file)
         except Exception as e:
             await update.message.reply_text(get_localized_message(update, "BACKUP_ERROR"))
@@ -301,8 +113,26 @@ if __name__ == '__main__':
     set_letterboxd_handler = CommandHandler('setletterboxd', set_letterboxd)
     application.add_handler(set_letterboxd_handler, 6)
 
-    settings_handler = CommandHandler(('impostazioni', 'settings'), settings)
-    application.add_handler(settings_handler, 97)
+    set_welcome_message_handler = CommandHandler(('setwelcome', 'setbenvenuto'), set_welcome_message)
+    application.add_handler(set_welcome_message_handler, 7)
+
+    send_welcome_message_handler = ChatMemberHandler(send_welcome_message, ChatMemberHandler.CHAT_MEMBER)
+    application.add_handler(send_welcome_message_handler, 8)
+
+    show_welcome_message_handler = CommandHandler(('benvenuto', 'welcome'), show_welcome_message)
+    application.add_handler(show_welcome_message_handler, 9)
+
+    delete_welcome_message_handler = CommandHandler(('cancellabenvenuto', 'deletewelcome'), delete_welcome_message)
+    application.add_handler(delete_welcome_message_handler, 10)
+
+    show_about_handler = CommandHandler(('info', 'about'), show_about)
+    application.add_handler(show_about_handler, 95)
+
+    show_settings_handler = CommandHandler(('impostazioni', 'settings'), show_settings)
+    application.add_handler(show_settings_handler, 96)
+
+    settings_button_handler = CallbackQueryHandler(settings_button)
+    application.add_handler(settings_button_handler, 97)
 
     send_backup_handler = CommandHandler('backup', send_backup)
     application.add_handler(send_backup_handler, 98)
@@ -310,4 +140,5 @@ if __name__ == '__main__':
     restart_handler = CommandHandler(('riavvia', 'restart'), restart_bot)
     application.add_handler(restart_handler, 99)
 
-    application.run_polling(drop_pending_updates=True)
+    allowed_updates = [Update.MESSAGE, Update.CALLBACK_QUERY, Update.CHAT_MEMBER]
+    application.run_polling(drop_pending_updates=True, allowed_updates=allowed_updates)

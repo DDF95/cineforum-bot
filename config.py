@@ -6,9 +6,12 @@ from localization import *
 
 MAIN_DIRECTORY = Path(__file__).absolute().parent
 
+if not Path(MAIN_DIRECTORY / "Data").exists():
+    Path(MAIN_DIRECTORY / "Data").mkdir()
+
 cfg = ConfigParser(interpolation=None)
 
-if not Path(MAIN_DIRECTORY / "config.ini").exists():
+if not Path(MAIN_DIRECTORY / "Data" / "config.ini").exists():
     language = input("Enter your language (type 'it' or 'en'): ").strip()
     if language not in ["it", "en"]:
         print("Invalid language. Defaulting to English.")
@@ -21,14 +24,15 @@ if not Path(MAIN_DIRECTORY / "config.ini").exists():
     cfg['bot'] = {'bot_token': bot_token}
     cfg['bot_admins'] = {'admin_1': user_id}
 
-    with open(MAIN_DIRECTORY / "config.ini", "w") as configfile:
+    with open(MAIN_DIRECTORY / "Data" / "config.ini", "w") as configfile:
         cfg.write(configfile)
     
     print(get_localized_message(language, "CONFIG_SUCCESS"))
 
-cfg.read(MAIN_DIRECTORY / "config.ini")
+cfg.read(MAIN_DIRECTORY / "Data" / "config.ini")
 
 BOT_TOKEN = cfg.get("bot", "bot_token")
 BOT_ADMINS = [int(admin) for admin in cfg["bot_admins"].values()]
 
-JSON_FILE_PATH = MAIN_DIRECTORY / "movie_data.json"
+MOVIE_DATA_FILE_PATH = MAIN_DIRECTORY / "Data" / "movie_data.json"
+SETTINGS_FILE_PATH = MAIN_DIRECTORY / "Data" / "settings.json"
