@@ -10,14 +10,19 @@
    - `/list`: Generate a list of all movies.
    - `/letterboxd`: Show the group's Letterboxd link.
    - `/setletterboxd`: Set the group's Letterboxd link.
-   - `/restart`: Restarts the bot.
+   - `/welcome`: Show the group's welcome message.
+   - `/settings`: Adjust the bot's settings.
+   - `/setwelcome`: Set the group's welcome message.
+   - `/deletewelcome`: Delete the group's welcome message.
+   - `/restart`: Restart the bot.
    - `/help`: Get information about available commands.
 
 ## Installation
 1. Clone this repository.
 2. Install the required dependencies: `pip install -r requirements.txt`.
-3. Replace the placeholder token in `main.py` with your own Telegram Bot API token.
-4. Run the bot: `python3 main.py`.
+3. Run the bot: `python3 main.py`.
+4. Follow the on-screen instructions to input your bot token and your user ID.
+5. You're good to go! :)
 
 ## Dependencies
 - [python-telegram-bot](https://python-telegram-bot.readthedocs.io/): Python wrapper for the Telegram Bot API.
@@ -26,11 +31,6 @@
 Contributions to the project are welcome! If you have any suggestions, bug reports, or improvements, please open an issue or submit a pull request.
 
 ## To-do
-1. Settings:
-   - welcome message (yes/no);
-   - welcome message text in html;
-   - unified movie list or one list per user;
-   - /choose command available only to admins (yes/no);
-   - /delete command available only to admins (yes/no);
-2. /info command: show information about the group (same as welcome message);
-3. Some sort of integration with JustWatch.
+1. Some sort of integration with JustWatch.
+2. Data management overhaul (as of now it's messy, with two `JSONs` and a `config.ini`).
+3. Some code must be simplified (looking at you, `delete_movies.py`).
