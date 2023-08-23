@@ -68,7 +68,7 @@ async def set_letterboxd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
 
 async def show_about(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("https://github.com/DDF95/cineforum-bot")
+    await update.message.reply_text("Version 1.0 https://github.com/DDF95/cineforum-bot")
 
 
 async def send_backup(update: Update, context: ContextTypes.DEFAULT_TYPE):
