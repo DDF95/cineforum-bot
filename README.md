@@ -19,8 +19,8 @@
 
 ## Installation
 1. Clone this repository: `git clone https://github.com/DDF95/cineforum-bot.git`
-2. Install the required dependencies: `pip install -r requirements.txt`.
-3. Run the bot: `python3 main.py`.
+2. Install the required dependencies: `pip install -r requirements.txt`
+3. Run the bot: `python3 main.py`
 4. Follow the on-screen instructions to input your bot token and your user ID.
 5. You're good to go! :)
 
